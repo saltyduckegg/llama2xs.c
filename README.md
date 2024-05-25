@@ -1,5 +1,15 @@
 ## llama2.c
 
+
+## getting started
+```shell
+mamba env create -f llama2.env.yaml
+```
+
+
+
+---
+
 <p align="center">
   <img src="assets/llama_cute.jpg" width="300" height="300" alt="Cute Llama">
 </p>
