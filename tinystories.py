@@ -43,7 +43,7 @@ def download():
     os.makedirs(DATA_CACHE_DIR, exist_ok=True)
 
     # download the TinyStories dataset, unless it's already downloaded
-    data_url = "https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/TinyStories_all_data.tar.gz"
+    data_url = "https://hf-mirror.com/datasets/roneneldan/TinyStories/resolve/main/TinyStories_all_data.tar.gz"
     data_filename = os.path.join(DATA_CACHE_DIR, "TinyStories_all_data.tar.gz")
     if not os.path.exists(data_filename):
         print(f"Downloading {data_url} to {data_filename}...")
