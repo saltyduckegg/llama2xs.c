@@ -132,7 +132,7 @@ def process_shard(args, vocab_size):
         data = json.load(f)
     all_tokens = []
     for example in tqdm(data, position=shard_id):
-        text = example["story"]
+        text = example
         text = text.strip()  # get rid of leading/trailing whitespace
         tokens = enc.encode(text, bos=True, eos=False)  # encode the text, use BOS
         all_tokens.extend(tokens)
@@ -156,9 +156,9 @@ def process_shard(args, vocab_size):
     print(f"Saved {tokenized_filename}, average seqlen: {avg_seq_len:.2f}")
 
 
-def pretokenize(vocab_size):
+def pretokenize(vocab_size,data_fold_name):
     # iterate the shards and tokenize all of them one by one
-    data_dir = os.path.join(DATA_CACHE_DIR, "TinyStories_all_data")
+    data_dir = os.path.join(DATA_CACHE_DIR, data_fold_name)
     shard_filenames = sorted(glob.glob(os.path.join(data_dir, "*.json")))
     if vocab_size > 0:
         # .bin files will be saved into tok{N} directory, create it once here
@@ -175,12 +175,13 @@ def pretokenize(vocab_size):
 class PretokDataset(torch.utils.data.IterableDataset):
     """Loads pretokenized examples from disk and yields them as PyTorch tensors."""
 
-    def __init__(self, split, max_seq_len, vocab_size, vocab_source):
+    def __init__(self, split, max_seq_len, vocab_size, vocab_source,data_fold_name):
         super().__init__()
         self.split = split
         self.max_seq_len = max_seq_len
         self.vocab_size = vocab_size
         self.vocab_source = vocab_source
+        self.data_fold_name = data_fold_name
 
     def __iter__(self):
         # get worker info within a DataLoader
@@ -194,7 +195,7 @@ class PretokDataset(torch.utils.data.IterableDataset):
         print(f"Created a PretokDataset with rng seed {seed}")
         if self.vocab_source == "llama2":
             # the .bin files are right along the .json files
-            bin_dir = os.path.join(DATA_CACHE_DIR, "TinyStories_all_data")
+            bin_dir = os.path.join(DATA_CACHE_DIR, self.data_fold_name)
             shard_filenames = sorted(glob.glob(os.path.join(bin_dir, "*.bin")))
         elif self.vocab_source == "custom":
             # the .bin files are in tok{N} directory
@@ -277,6 +278,6 @@ if __name__ == "__main__":
     elif args.stage == "train_vocab":
         train_vocab(vocab_size=args.vocab_size,data_fold_name=args.data_fold_name)
     elif args.stage == "pretokenize":
-        pretokenize(vocab_size=args.vocab_size)
+        pretokenize(vocab_size=args.vocab_size,data_fold_name=args.data_fold_name)
     else:
         raise ValueError(f"Unknown stage {args.stage}")
