@@ -68,7 +68,7 @@ def download():
     print(f"Number of shards: {len(shard_filenames)}")
     print(f"Example story:\n{data[0]}")
 
-def train_vocab(vocab_size):
+def train_vocab(vocab_size,data_fold_name):
     """
     Trains a custom sentencepiece tokenizer on the TinyStories dataset.
     The custom tokenizer files will be saved in DATA_CACHE_DIR/tok{N} directories,
@@ -84,7 +84,7 @@ def train_vocab(vocab_size):
 
     # 1) export a large chunk of text as a single text file tiny.txt
     tiny_file = os.path.join(DATA_CACHE_DIR, "tiny.txt")
-    data_dir = os.path.join(DATA_CACHE_DIR, "TinyStories_all_data")
+    data_dir = os.path.join(DATA_CACHE_DIR, data_fold_name)
     shard_filenames = sorted(glob.glob(os.path.join(data_dir, "*.json")))
 
     print(f"Writing temporary file {tiny_file} with {num_shards} shards...")
@@ -93,7 +93,7 @@ def train_vocab(vocab_size):
             with open(shard, "r") as f:
                 data = json.load(f)
             for example in data:
-                text = example["story"]
+                text = example
                 text = text.strip()
                 of.write(text + "\n")
     print(f"Size is: {os.path.getsize(tiny_file) / 1024 / 1024:.2f} MB")
@@ -268,13 +268,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("stage", type=str, choices=["download", "pretokenize", "train_vocab"])
     parser.add_argument("--vocab_size", type=int, default=0, help="pretokenization vocab size. 0 = use Llama 2 tokenizer.")
+    parser.add_argument("--data_fold_name", type=str, default="TinyStories_all_data", help="folder name of the data")
     args = parser.parse_args()
 
     # depending on the stage call the appropriate function
     if args.stage == "download":
         download()
     elif args.stage == "train_vocab":
-        train_vocab(vocab_size=args.vocab_size)
+        train_vocab(vocab_size=args.vocab_size,data_fold_name=args.data_fold_name)
     elif args.stage == "pretokenize":
         pretokenize(vocab_size=args.vocab_size)
     else:
