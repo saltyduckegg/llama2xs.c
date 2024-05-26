@@ -175,13 +175,12 @@ def pretokenize(vocab_size,data_fold_name):
 class PretokDataset(torch.utils.data.IterableDataset):
     """Loads pretokenized examples from disk and yields them as PyTorch tensors."""
 
-    def __init__(self, split, max_seq_len, vocab_size, vocab_source,data_fold_name):
+    def __init__(self, split, max_seq_len, vocab_size, vocab_source):
         super().__init__()
         self.split = split
         self.max_seq_len = max_seq_len
         self.vocab_size = vocab_size
         self.vocab_source = vocab_source
-        self.data_fold_name = data_fold_name
 
     def __iter__(self):
         # get worker info within a DataLoader
